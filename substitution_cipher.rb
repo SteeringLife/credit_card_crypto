@@ -5,6 +5,13 @@ require_relative './credit_card'
 module SubstitutionCipher
   # Caesar cipher
   module Caesar
+    def self.shift_char(char, key)
+      lowercase = ('a'..'z').to_a.join
+      uppercase = ('A'..'Z').to_a.join
+      char.tr(lowercase, lowercase[key..-1] + lowercase[0...key])
+          .tr(uppercase, uppercase[key..-1] + uppercase[0...key])
+    end
+
     # Encrypts document using key
     # Arguments:
     #   document: String
@@ -12,8 +19,7 @@ module SubstitutionCipher
     # Returns: String
     def self.encrypt(document, key)
       # TODO: encrypt string using caesar cipher
-      document = document.to_s
-      document.chars.map { |char| shift_char(char, key) }.join
+      document.to_s.chars.map { |char| shift_char(char, key) }.join
     end
 
     # Decrypts String document using integer key
@@ -24,15 +30,6 @@ module SubstitutionCipher
     def self.decrypt(document, key)
       # TODO: decrypt string using caesar cipher
       encrypt(document, -key)
-    end
-
-    def self.shift_char(char, key)
-      if char.match?(/[A-Za-z]/)
-        base = char.ord < 97 ? 65 : 97
-        ((char.ord - base + key) % 26 + base).chr
-      else
-        char
-      end
     end
   end
 
