@@ -5,31 +5,44 @@ require 'matrix'
 
 # DoubleTranspositionCipher
 module DoubleTranspositionCipher
+  def self.get_size(text)
+    Math.sqrt(text.length).ceil
+  end
+
+  def self.smear(arr, key)
+    arr.shuffle(random: Random.new(key))
+  end
+
+  def self.recover(arr, key)
+    keys = Array.new(arr.length) { |i| i + 1 }
+    arr.sort_by { |ele_arr| keys.shuffle(random: Random.new(key))[arr.index(ele_arr)] }
+  end
+
   def self.encrypt(document, key)
     document = document.to_s
     # 1. find number of rows/cols such that matrix is almost square
-    size = Math.sqrt(document.length).ceil
-    rows = (document + ' ' * (size**2 - document.length)).chars.each_slice(size).to_a
+    size = get_size document
     # 2. break plaintext into evenly sized blocks
-    cols = rows.transpose
+    rows = (document + ' ' * (size**2 - document.length)).chars.each_slice(size).to_a
     # 3. sort rows in predictably random way using key as seed
-    rows.shuffle!(random: Random.new(key))
+    rows_shuffle = smear(rows, key)
     # 4. sort columns of each row in predictably random way
-    cols.each { |col| col.shuffle!(random: Random.new(key)) }
+    cols = rows_shuffle.transpose
+    cols_shuffle = smear(cols, key)
     # 5. return joined cyphertext
-    cols.transpose.join
+    cols_shuffle.transpose.join
   end
 
   def self.decrypt(ciphertext, key)
     # 1. find number of rows/cols such that matrix is almost square
-    size = Math.sqrt(ciphertext.length).ceil
-    cols = ciphertext.split('\"').reject { |s| s.strip == '' }
+    size = get_size ciphertext
     # 2. sort columns of each row in predictably random way
-    cols.each { |col| col.gsub!(/\s/, '').chars.shuffle!(random: Random.new(key)) }
+    cols = (ciphertext + ' ' * (size**2 - ciphertext.length)).chars.each_slice(size).to_a
+    cols_original = recover(cols, key)
     # 3. sort rows in predictibly random way using key as seed
-    rows = cols.each_slice(size).to_a
-    rows.shuffle!(random: Random.new(key))
+    rows = cols_original.transpose
+    original_rows = recover(rows, key)
     # 4. return joined plaintext
-    rows.transpose.flatten.join.gsub(/\s+$/, '')
+    original_rows.transpose.join.strip
   end
 end
