@@ -65,5 +65,3 @@ class CreditCard
     digest.unpack1('H*')
   end
 end
-
-# rubocop:enable Layout/EndOfLine
