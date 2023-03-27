@@ -7,3 +7,9 @@ Metrics/BlockLength:
   Exclude:
     - spec/**/*
     - Rakefile
+
+Layout/EndOfLine:
+  Enabled: false
+
+Layout/EndOfLine:
+  Enabled: false
